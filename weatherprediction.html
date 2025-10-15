@@ -1,0 +1,474 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Weather Prediction System</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #74b9ff 0%, #0984e3 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            padding: 30px;
+        }
+
+        .input-section {
+            background: #f8f9fa;
+            padding: 25px;
+            border-radius: 15px;
+            border: 2px solid #e9ecef;
+        }
+
+        .input-section h2 {
+            color: #495057;
+            margin-bottom: 20px;
+            font-size: 1.5rem;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #495057;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #dee2e6;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: border-color 0.3s;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .predict-btn {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .predict-btn:hover {
+            transform: translateY(-2px);
+        }
+
+        .results-section {
+            background: #f8f9fa;
+            padding: 25px;
+            border-radius: 15px;
+            border: 2px solid #e9ecef;
+        }
+
+        .results-section h2 {
+            color: #495057;
+            margin-bottom: 20px;
+            font-size: 1.5rem;
+        }
+
+        .result-card {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 15px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            border-left: 4px solid #667eea;
+        }
+
+        .result-card h3 {
+            color: #495057;
+            margin-bottom: 10px;
+        }
+
+        .weather-icon {
+            font-size: 3rem;
+            text-align: center;
+            margin: 20px 0;
+        }
+
+        .probability-bar {
+            background: #e9ecef;
+            height: 8px;
+            border-radius: 4px;
+            margin: 5px 0;
+            overflow: hidden;
+        }
+
+        .probability-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            transition: width 0.5s ease;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .stat-item {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+
+        .stat-value {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #667eea;
+        }
+
+        .stat-label {
+            font-size: 0.9rem;
+            color: #6c757d;
+            margin-top: 5px;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 20px;
+        }
+
+        .spinner {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 10px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        @media (max-width: 768px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+            
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .info-section {
+            background: #e3f2fd;
+            padding: 20px;
+            margin: 20px 30px;
+            border-radius: 10px;
+            border-left: 4px solid #2196f3;
+        }
+
+        .info-section h3 {
+            color: #1976d2;
+            margin-bottom: 10px;
+        }
+
+        .info-section p {
+            color: #424242;
+            line-height: 1.6;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🌤️ Weather Prediction System</h1>
+            <p>Advanced ML-powered weather forecasting based on atmospheric conditions</p>
+        </div>
+
+        <div class="info-section">
+            <h3>How it works</h3>
+            <p>This system uses machine learning algorithms to predict weather conditions and atmospheric values based on current measurements. Enter the current weather parameters below to get predictions for weather conditions, temperature, and humidity levels.</p>
+        </div>
+
+        <div class="main-content">
+            <div class="input-section">
+                <h2>📊 Input Weather Parameters</h2>
+                <form id="weatherForm">
+                    <div class="form-group">
+                        <label for="temperature">Temperature (°C)</label>
+                        <input type="number" id="temperature" step="0.1" value="22" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="humidity">Humidity (%)</label>
+                        <input type="number" id="humidity" min="0" max="100" step="0.1" value="65" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="pressure">Atmospheric Pressure (hPa)</label>
+                        <input type="number" id="pressure" step="0.1" value="1013" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="windSpeed">Wind Speed (km/h)</label>
+                        <input type="number" id="windSpeed" min="0" step="0.1" value="8" required>
+                    </div>
+                    
+                    <button type="submit" class="predict-btn">🔮 Predict Weather</button>
+                </form>
+            </div>
+
+            <div class="results-section">
+                <h2>🎯 Prediction Results</h2>
+                
+                <div class="loading" id="loading">
+                    <div class="spinner"></div>
+                    <p>Analyzing weather patterns...</p>
+                </div>
+
+                <div id="results" style="display: none;">
+                    <div class="result-card">
+                        <h3>Weather Condition</h3>
+                        <div class="weather-icon" id="weatherIcon">🌤️</div>
+                        <div style="text-align: center;">
+                            <strong id="predictedCondition">-</strong>
+                        </div>
+                    </div>
+
+                    <div class="result-card">
+                        <h3>Condition Probabilities</h3>
+                        <div id="probabilities"></div>
+                    </div>
+
+                    <div class="stats-grid">
+                        <div class="stat-item">
+                            <div class="stat-value" id="predictedTemp">-</div>
+                            <div class="stat-label">Predicted Temperature (°C)</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-value" id="predictedHumidity">-</div>
+                            <div class="stat-label">Predicted Humidity (%)</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="noResults">
+                    <p style="text-align: center; color: #6c757d; padding: 40px;">
+                        Enter weather parameters and click "Predict Weather" to see results
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Simulated ML model predictions (in real implementation, this would call your Python backend)
+        class WeatherPredictor {
+            constructor() {
+                // Simulated model weights and parameters
+                this.conditionWeights = {
+                    temperature: 0.3,
+                    humidity: 0.4,
+                    pressure: 0.2,
+                    windSpeed: 0.1
+                };
+            }
+
+            predictWeather(temp, humidity, pressure, windSpeed) {
+                // Simulate ML prediction logic
+                let sunnyScore = (temp > 20 ? temp - 20 : 0) * 0.1 + 
+                               (humidity < 60 ? 60 - humidity : 0) * 0.05 +
+                               (pressure > 1010 ? pressure - 1010 : 0) * 0.01;
+
+                let rainyScore = (humidity > 70 ? humidity - 70 : 0) * 0.1 +
+                               (windSpeed > 10 ? windSpeed - 10 : 0) * 0.2 +
+                               (pressure < 1000 ? 1000 - pressure : 0) * 0.05;
+
+                let cloudyScore = Math.abs(temp - 15) * 0.05 +
+                                (humidity > 50 && humidity < 80 ? 10 : 0) * 0.1 +
+                                (pressure > 1000 && pressure < 1020 ? 5 : 0) * 0.1;
+
+                // Normalize scores
+                const total = sunnyScore + rainyScore + cloudyScore + 1;
+                const probabilities = {
+                    'Sunny': sunnyScore / total,
+                    'Rainy': rainyScore / total,
+                    'Cloudy': cloudyScore / total
+                };
+
+                // Get predicted condition
+                const predictedCondition = Object.keys(probabilities).reduce((a, b) => 
+                    probabilities[a] > probabilities[b] ? a : b
+                );
+
+                // Predict temperature and humidity with some variation
+                const predictedTemp = temp + (Math.random() - 0.5) * 4;
+                const predictedHumidity = Math.max(0, Math.min(100, 
+                    humidity + (Math.random() - 0.5) * 20
+                ));
+
+                return {
+                    condition: predictedCondition,
+                    probabilities: probabilities,
+                    temperature: predictedTemp,
+                    humidity: predictedHumidity
+                };
+            }
+        }
+
+        const predictor = new WeatherPredictor();
+
+        function getWeatherIcon(condition) {
+            const icons = {
+                'Sunny': '☀️',
+                'Rainy': '🌧️',
+                'Cloudy': '☁️'
+            };
+            return icons[condition] || '🌤️';
+        }
+
+        function displayResults(prediction) {
+            document.getElementById('weatherIcon').textContent = getWeatherIcon(prediction.condition);
+            document.getElementById('predictedCondition').textContent = prediction.condition;
+            document.getElementById('predictedTemp').textContent = prediction.temperature.toFixed(1);
+            document.getElementById('predictedHumidity').textContent = prediction.humidity.toFixed(1);
+
+            // Display probabilities
+            const probabilitiesDiv = document.getElementById('probabilities');
+            probabilitiesDiv.innerHTML = '';
+            
+            Object.entries(prediction.probabilities).forEach(([condition, prob]) => {
+                const probDiv = document.createElement('div');
+                probDiv.style.marginBottom = '10px';
+                probDiv.innerHTML = `
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
+                        <span>${getWeatherIcon(condition)} ${condition}</span>
+                        <span>${(prob * 100).toFixed(1)}%</span>
+                    </div>
+                    <div class="probability-bar">
+                        <div class="probability-fill" style="width: ${prob * 100}%"></div>
+                    </div>
+                `;
+                probabilitiesDiv.appendChild(probDiv);
+            });
+
+            // Show results
+            document.getElementById('noResults').style.display = 'none';
+            document.getElementById('results').style.display = 'block';
+        }
+
+        document.getElementById('weatherForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            // Show loading
+            document.getElementById('loading').style.display = 'block';
+            document.getElementById('results').style.display = 'none';
+            document.getElementById('noResults').style.display = 'none';
+
+            // Get input values
+            const temp = parseFloat(document.getElementById('temperature').value);
+            const humidity = parseFloat(document.getElementById('humidity').value);
+            const pressure = parseFloat(document.getElementById('pressure').value);
+            const windSpeed = parseFloat(document.getElementById('windSpeed').value);
+
+            // Simulate API call delay
+            setTimeout(() => {
+                const prediction = predictor.predictWeather(temp, humidity, pressure, windSpeed);
+                document.getElementById('loading').style.display = 'none';
+                displayResults(prediction);
+            }, 1500);
+        });
+
+        // Add some sample data buttons
+        function loadSampleData(temp, humidity, pressure, windSpeed) {
+            document.getElementById('temperature').value = temp;
+            document.getElementById('humidity').value = humidity;
+            document.getElementById('pressure').value = pressure;
+            document.getElementById('windSpeed').value = windSpeed;
+        }
+
+        // Add sample data buttons to the form
+        document.addEventListener('DOMContentLoaded', function() {
+            const form = document.getElementById('weatherForm');
+            const samplesDiv = document.createElement('div');
+            samplesDiv.innerHTML = `
+                <div style="margin-top: 20px; padding-top: 20px; border-top: 2px solid #dee2e6;">
+                    <h4 style="margin-bottom: 10px; color: #495057;">Quick Samples:</h4>
+                    <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                        <button type="button" onclick="loadSampleData(30, 45, 1020, 5)" 
+                                style="padding: 8px 12px; background: #28a745; color: white; border: none; border-radius: 5px; cursor: pointer;">
+                            Hot & Dry
+                        </button>
+                        <button type="button" onclick="loadSampleData(15, 85, 995, 15)" 
+                                style="padding: 8px 12px; background: #007bff; color: white; border: none; border-radius: 5px; cursor: pointer;">
+                            Cold & Wet
+                        </button>
+                        <button type="button" onclick="loadSampleData(22, 65, 1013, 8)" 
+                                style="padding: 8px 12px; background: #ffc107; color: black; border: none; border-radius: 5px; cursor: pointer;">
+                            Moderate
+                        </button>
+                    </div>
+                </div>
+            `;
+            form.appendChild(samplesDiv);
+        });
+    </script>
+</body>
+</html>
